@@ -25,16 +25,32 @@ type PrescriptionDetail = PrescriptionListItem & {
   used_cache: boolean;
 };
 
-const API_BASE_URL =
+type ParsedInteraction = {
+  severity: string;
+  pairs: string[];
+  mechanisms: string[];
+  risks: string[];
+  actions: string[];
+};
+
+const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "http://127.0.0.1:8000";
+  "http://127.0.0.1:8000"
+).replace(/\/$/, "");
 
 const severityClass: Record<Severity, string> = {
   None: "border-slate-300 bg-slate-100 text-slate-700",
   Mild: "border-yellow-300 bg-yellow-50 text-yellow-900",
   Moderate: "border-orange-300 bg-orange-50 text-orange-900",
   Severe: "border-red-300 bg-red-50 text-red-800",
+};
+
+const severityPanelClass: Record<Severity, string> = {
+  None: "border-l-slate-400 bg-slate-50/70",
+  Mild: "border-l-yellow-400 bg-yellow-50/60",
+  Moderate: "border-l-orange-500 bg-orange-50/60",
+  Severe: "border-l-red-600 bg-red-50/60",
 };
 
 function SeverityBadge({ severity }: { severity: Severity }) {
@@ -63,6 +79,56 @@ function cleanLine(line: string) {
   return line.replace(/^#{1,6}\s*/, "").replace(/^[-*]\s+/, "").replace(/\*\*/g, "").replace(/`/g, "").trim();
 }
 
+function parseInteraction(text: string, fallbackSeverity: Severity): ParsedInteraction {
+  const parsed: ParsedInteraction = {
+    severity: fallbackSeverity,
+    pairs: [],
+    mechanisms: [],
+    risks: [],
+    actions: [],
+  };
+  let section: "pairs" | "mechanisms" | "risks" | "actions" | null = null;
+
+  text.split("\n").map(cleanLine).filter(Boolean).forEach((line) => {
+    const [label, ...rest] = line.split(":");
+    const value = rest.join(":").trim();
+    const key = label.toLowerCase();
+
+    if (key === "severity") {
+      parsed.severity = value || fallbackSeverity;
+      section = null;
+      return;
+    }
+    if (key === "interacting pairs") {
+      section = "pairs";
+      if (value && value !== "None identified.") parsed.pairs.push(value);
+      return;
+    }
+    if (key === "clinical mechanisms") {
+      section = "mechanisms";
+      if (value && value !== "None identified.") parsed.mechanisms.push(value);
+      return;
+    }
+    if (key === "clinical risks") {
+      section = "risks";
+      if (value && value !== "None identified.") parsed.risks.push(value);
+      return;
+    }
+    if (key === "recommended pharmacist actions") {
+      section = "actions";
+      if (value && value !== "None identified.") parsed.actions.push(value);
+      return;
+    }
+    if (section) {
+      parsed[section].push(line);
+    } else {
+      parsed.risks.push(line);
+    }
+  });
+
+  return parsed;
+}
+
 function InteractionText({ text }: { text: string }) {
   return (
     <div className="space-y-2 text-sm leading-6 text-slate-800">
@@ -74,6 +140,66 @@ function InteractionText({ text }: { text: string }) {
         return <p key={index} className="pl-4 before:mr-2 before:content-['•']">{line}</p>;
       })}
     </div>
+  );
+}
+
+function InteractionAnalysisCard({ prescription }: { prescription: PrescriptionDetail }) {
+  const text = interactionText(prescription);
+  const parsed = parseInteraction(text, prescription.severity);
+  const primaryPair =
+    parsed.pairs[0] ||
+    prescription.drugs.map((drug) => drug.name).join(" + ") ||
+    "No interaction pair";
+  const summary =
+    parsed.risks[0] ||
+    parsed.mechanisms[0] ||
+    text.split("\n").map(cleanLine).find(Boolean) ||
+    "No interaction narrative available.";
+  const mechanism = parsed.mechanisms.join(" ") || "No specific drug-drug mechanism identified.";
+  const action = parsed.actions.join(" ") || "Continue routine pharmacist review before dispensing.";
+
+  return (
+    <article className={`rounded-2xl border border-slate-200 border-l-4 bg-white p-4 shadow-sm sm:p-6 ${severityPanelClass[prescription.severity]}`}>
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-slate-950">Interaction Analysis Result</h2>
+          <p className="text-sm text-slate-600">
+            Patient: <span className="font-bold">{prescription.patient_name}</span> | Doctor: <span className="font-bold">{prescription.doctor_name}</span>
+          </p>
+          <p className="mt-1 text-xs font-semibold uppercase text-slate-500">Status: {prescription.interaction_status}</p>
+        </div>
+        <SeverityBadge severity={prescription.severity} />
+      </div>
+
+      {prescription.interaction_status === "Error" && (
+        <div className="mb-4 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+          Interaction check failed, but this prescription was saved. Please retry review before dispensing.
+        </div>
+      )}
+
+      <p className="mb-5 text-base leading-7 text-slate-900 sm:text-lg">{summary}</p>
+
+      <div className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+        Interactions Identified ({parsed.pairs.length || (prescription.severity === "None" ? 0 : 1)})
+      </div>
+
+      <section className="rounded-xl bg-white/70 p-4 sm:p-5">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <span aria-hidden="true">⚠</span>
+          <h3 className="text-base font-bold text-slate-950">{primaryPair}</h3>
+          <SeverityBadge severity={prescription.severity} />
+        </div>
+        <p className="text-sm leading-6 text-slate-700">
+          <span className="font-bold text-slate-800">Mechanism:</span> {mechanism}
+        </p>
+        <div className="mt-4 rounded-lg bg-white px-3 py-3 text-sm leading-5 text-slate-900 shadow-sm">
+          <span className="font-bold">Recommended Action:</span> {action}
+        </div>
+        {prescription.used_cache && (
+          <p className="mt-3 text-xs font-bold uppercase text-teal-700">Served from cached interaction result</p>
+        )}
+      </section>
+    </article>
   );
 }
 
@@ -233,17 +359,7 @@ export default function PrescriptionsPage() {
                 ))}
               </div>
 
-              <div className="rounded bg-slate-50 p-4">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-sm font-bold">AI Interaction Warning</h3>
-                  <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold ${statusClass(selected.interaction_status)}`}>{selected.interaction_status}</span>
-                </div>
-                {selected.interaction_status === "Error" && (
-                  <div className="mb-3 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">Interaction check failed, but this prescription was saved. Please retry review before dispensing.</div>
-                )}
-                <InteractionText text={interactionText(selected)} />
-                {selected.used_cache && <p className="mt-3 text-xs font-bold uppercase text-teal-700">Served from cached interaction result</p>}
-              </div>
+              <InteractionAnalysisCard prescription={selected} />
 
               <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
                 <button type="button" className="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-100 disabled:cursor-wait disabled:opacity-60" disabled={deletingId === selected.id} onClick={() => deletePrescription(selected.id)}>
