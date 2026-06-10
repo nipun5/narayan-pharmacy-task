@@ -315,17 +315,16 @@ export default function PrescriptionsPage() {
                   <th scope="col" className="px-3 py-3">Date</th>
                   <th scope="col" className="px-3 py-3">Drug Count</th>
                   <th scope="col" className="px-3 py-3">Severity</th>
-                  <th scope="col" className="px-3 py-3">Status</th>
                   <th scope="col" className="px-3 py-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoadingList && (
-                  <tr><td className="px-3 py-6 text-slate-500" colSpan={6}>Loading prescriptions...</td></tr>
+                  <tr><td className="px-3 py-6 text-slate-500" colSpan={5}>Loading prescriptions...</td></tr>
                 )}
                 {!isLoadingList && prescriptions.length === 0 && (
                   <tr>
-                    <td className="px-3 py-8 text-center text-slate-500" colSpan={6}>
+                    <td className="px-3 py-8 text-center text-slate-500" colSpan={5}>
                       <p className="text-sm font-medium">No saved prescriptions yet.</p>
                       <Link href="/" className="mt-2 inline-flex text-xs font-bold text-blue-700 underline underline-offset-2 hover:text-blue-900">
                         Enter the first prescription
@@ -339,7 +338,6 @@ export default function PrescriptionsPage() {
                     <td className="px-3 py-3">{prescription.date}</td>
                     <td className="px-3 py-3">{prescription.drug_count}</td>
                     <td className="px-3 py-3"><SeverityBadge severity={prescription.severity} /></td>
-                    <td className="px-3 py-3"><span className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold ${statusClass(prescription.interaction_status)}`}>{prescription.interaction_status}</span></td>
                     <td className="px-3 py-3 text-right">
                       <button type="button" className="rounded border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:cursor-wait disabled:opacity-60" disabled={deletingId === prescription.id} onClick={(event) => { event.stopPropagation(); deletePrescription(prescription.id); }}>
                         {deletingId === prescription.id ? "Deleting..." : "Delete"}
