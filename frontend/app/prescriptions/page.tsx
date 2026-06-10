@@ -53,6 +53,13 @@ const severityPanelClass: Record<Severity, string> = {
   Severe: "border-l-red-600 bg-red-50/60",
 };
 
+const recommendationClass: Record<Severity, string> = {
+  None: "border-slate-200 bg-slate-50 text-slate-900",
+  Mild: "border-yellow-300 bg-yellow-50 text-yellow-950",
+  Moderate: "border-orange-300 bg-orange-50 text-orange-950",
+  Severe: "border-red-300 bg-red-50 text-red-950",
+};
+
 function SeverityBadge({ severity }: { severity: Severity }) {
   return (
     <span className={`inline-flex min-w-24 items-center justify-center rounded-full border px-3 py-1 text-xs font-bold uppercase ${severityClass[severity]}`}>
@@ -226,7 +233,7 @@ function InteractionAnalysisCard({ prescription }: { prescription: PrescriptionD
         <p className="text-sm leading-6 text-slate-700">
           <span className="font-bold text-slate-800">Mechanism:</span> {mechanism}
         </p>
-        <div className="mt-4 rounded-lg bg-white px-3 py-3 text-sm leading-5 text-slate-900 shadow-sm">
+        <div className={`mt-4 rounded-lg border px-4 py-3 text-sm leading-6 shadow-sm ${recommendationClass[prescription.severity]}`}>
           <span className="font-bold">Recommended Action:</span> {action}
         </div>
         {prescription.used_cache && (
@@ -339,10 +346,11 @@ export default function PrescriptionsPage() {
 
         <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
           <div className="overflow-x-auto rounded border border-slate-200">
-            <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[900px] border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
                   <th scope="col" className="px-3 py-3">Patient</th>
+                  <th scope="col" className="px-3 py-3">Prescribing Doctor</th>
                   <th scope="col" className="px-3 py-3">Date</th>
                   <th scope="col" className="px-3 py-3">Drug Count</th>
                   <th scope="col" className="px-3 py-3">Severity</th>
@@ -351,11 +359,11 @@ export default function PrescriptionsPage() {
               </thead>
               <tbody>
                 {isLoadingList && (
-                  <tr><td className="px-3 py-6 text-slate-500" colSpan={5}>Loading prescriptions...</td></tr>
+                  <tr><td className="px-3 py-6 text-slate-500" colSpan={6}>Loading prescriptions...</td></tr>
                 )}
                 {!isLoadingList && prescriptions.length === 0 && (
                   <tr>
-                    <td className="px-3 py-8 text-center text-slate-500" colSpan={5}>
+                    <td className="px-3 py-8 text-center text-slate-500" colSpan={6}>
                       <p className="text-sm font-medium">No saved prescriptions yet.</p>
                       <Link href="/" className="mt-2 inline-flex text-xs font-bold text-blue-700 underline underline-offset-2 hover:text-blue-900">
                         Enter the first prescription
@@ -366,6 +374,7 @@ export default function PrescriptionsPage() {
                 {prescriptions.map((prescription) => (
                   <tr key={prescription.id} className="cursor-pointer border-t border-slate-200 transition hover:bg-blue-50" onClick={() => openDetail(prescription.id)}>
                     <td className="px-3 py-3 font-semibold">{prescription.patient_name}</td>
+                    <td className="px-3 py-3 text-slate-700">{prescription.doctor_name}</td>
                     <td className="px-3 py-3">{prescription.date}</td>
                     <td className="px-3 py-3">{prescription.drug_count}</td>
                     <td className="px-3 py-3"><SeverityBadge severity={prescription.severity} /></td>

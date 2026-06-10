@@ -56,6 +56,13 @@ const severityPanelClass: Record<Severity, string> = {
   Severe: "border-l-red-600 bg-red-50/60",
 };
 
+const recommendationClass: Record<Severity, string> = {
+  None: "border-slate-200 bg-slate-50 text-slate-900",
+  Mild: "border-yellow-300 bg-yellow-50 text-yellow-950",
+  Moderate: "border-orange-300 bg-orange-50 text-orange-950",
+  Severe: "border-red-300 bg-red-50 text-red-950",
+};
+
 function SeverityBadge({ severity }: { severity: Severity }) {
   return (
     <span className={`inline-flex min-w-24 items-center justify-center rounded-full border px-3 py-1 text-xs font-bold uppercase ${severityClass[severity]}`}>
@@ -224,7 +231,7 @@ function InteractionAnalysisCard({ prescription }: { prescription: PrescriptionD
         <p className="text-sm leading-6 text-slate-700">
           <span className="font-bold text-slate-800">Mechanism:</span> {mechanism}
         </p>
-        <div className="mt-4 rounded-lg bg-white px-3 py-3 text-sm leading-5 text-slate-900 shadow-sm">
+        <div className={`mt-4 rounded-lg border px-4 py-3 text-sm leading-6 shadow-sm ${recommendationClass[prescription.severity]}`}>
           <span className="font-bold">Recommended Action:</span> {action}
         </div>
         {prescription.used_cache && (
