@@ -405,11 +405,7 @@ export default function Home() {
                   <SeverityBadge severity={inlineResult.severity} />
                 </div>
 
-                <div className="space-y-2 text-sm leading-6 text-slate-800">
-                  {formatInteraction(getInteractionText(inlineResult)).map((line, index) => (
-                    <p key={index}>{line}</p>
-                  ))}
-                </div>
+                <InteractionText text={getInteractionText(inlineResult)} />
 
                 {inlineResult.api_error && (
                   <div className="mt-3 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">
@@ -541,11 +537,7 @@ export default function Home() {
 
                 <div className="rounded bg-slate-50 p-4">
                   <h4 className="mb-2 text-sm font-bold">AI Interaction Warning</h4>
-                  <div className="space-y-2 text-sm leading-6 text-slate-800">
-                    {formatInteraction(getInteractionText(selected)).map((line, index) => (
-                      <p key={index}>{line}</p>
-                    ))}
-                  </div>
+                  <InteractionText text={getInteractionText(selected)} />
 
                   {selected.used_cache && (
                     <p className="mt-3 text-xs font-bold uppercase text-teal-700">
