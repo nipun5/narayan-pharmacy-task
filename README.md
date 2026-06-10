@@ -217,5 +217,5 @@ This project intentionally does not include:
 
 ## AI Workflow Evidence
 
-- `CLAUDE.md` documents project instructions for AI assistants.
-- `MEMORY.md` documents prompting history, architecture decisions, and course corrections.
+- `CLAUDE.md` documents the operating instructions given to AI assistants while building this project. It explains the required two-screen scope, backend/frontend conventions, Claude integration rules, caching expectations, and explicit features that should not be added.
+- `MEMORY.md` documents the development trail behind the final implementation. It records the prompting history, architecture decisions, schema trade-offs, bug fixes, compatibility corrections, and course corrections made during the build.
