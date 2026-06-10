@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-`narayan-pharmacy-task` is a focused pharmacy SaaS feature for prescription entry and drug-drug interaction review. The application has exactly two user-facing screens: a prescription entry form and a saved prescriptions list/detail experience.
+`narayan-pharmacy-task` is a focused pharmacy SaaS feature for prescription entry and drug-drug interaction review. The application has exactly two user-facing pages: a prescription entry form and a saved prescriptions list/detail page.
 
 ## Tech Stack
 
@@ -43,6 +43,8 @@ narayan-pharmacy-task/
       globals.css
       layout.tsx
       page.tsx
+      prescriptions/
+        page.tsx
   .env.example
   .gitignore
   MEMORY.md
@@ -51,7 +53,7 @@ narayan-pharmacy-task/
 
 ## Required Screens Only
 
-### Screen 1: Prescription Entry Form
+### Screen 1: Prescription Entry Form (`/`)
 
 Required fields:
 
@@ -70,12 +72,12 @@ Required behavior:
 - Never display raw JSON to the user.
 - API failures must produce visible, graceful error states.
 
-### Screen 2: Prescriptions List and Detail
+### Screen 2: Prescriptions List and Detail (`/prescriptions`)
 
 Required fields and behavior:
 
 - Table of saved prescriptions showing patient, date, and drug count.
-- Clicking a row opens a full prescription detail view.
+- Clicking a row opens a modal prescription detail view.
 - Detail view clearly shows the AI interaction warning/result.
 - Detail view includes a highly visible severity badge: Mild, Moderate, or Severe.
 
@@ -149,7 +151,8 @@ Expected local URLs:
 
 ## Implementation Notes
 
-- `backend/prescriptions/services.py` owns Claude prompting, one-drug skip behavior, cache lookup, and graceful API failure handling.
-- The cache key is a normalized, alphabetically sorted, comma-separated drug and dosage combination.
+- `backend/prescriptions/services.py` owns Claude prompting, zero/one-drug skip behavior, cache lookup, JSON parsing, and graceful API failure handling.
+- Claude is instructed with a senior clinical pharmacist system prompt, `temperature=0.0`, and a strict JSON response schema.
+- The cache key is a normalized, alphabetically sorted `drug(dosage)+drug(dosage)` combination.
 - The frontend consumes REST only; it does not call Claude directly.
-- The frontend shows formatted interaction text, visible loading/error states, collapsible detail rows, and delete confirmation.
+- The frontend shows formatted interaction text, visible loading/error states, modal detail views, and delete confirmation.

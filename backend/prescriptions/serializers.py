@@ -24,6 +24,7 @@ class PrescriptionListSerializer(serializers.ModelSerializer):
             "date",
             "drug_count",
             "severity",
+            "interaction_status",
             "created_at",
         ]
 
@@ -46,6 +47,7 @@ class PrescriptionDetailSerializer(serializers.ModelSerializer):
             "interaction_result",
             "interaction_summary",
             "severity",
+            "interaction_status",
             "api_error",
             "used_cache",
             "created_at",
@@ -61,7 +63,7 @@ class PrescriptionCreateSerializer(serializers.Serializer):
     patient_name = serializers.CharField(max_length=255)
     doctor_name = serializers.CharField(max_length=255)
     date = serializers.DateField()
-    drugs = DrugInputSerializer(many=True)
+    drugs = DrugInputSerializer(many=True, required=False)
 
     def validate_drugs(self, drugs):
         cleaned = [
@@ -72,6 +74,4 @@ class PrescriptionCreateSerializer(serializers.Serializer):
             for drug in drugs
             if drug.get("name", "").strip() and drug.get("dosage", "").strip()
         ]
-        if not cleaned:
-            raise serializers.ValidationError("At least one drug is required.")
         return cleaned

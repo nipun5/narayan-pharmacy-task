@@ -24,6 +24,7 @@ This file documents the collaborative development trail for `narayan-pharmacy-ta
 - Implemented `PrescriptionItem` instead of an inventory-style drug master table to avoid scope creep.
 - Implemented `DrugInteractionCache` with a normalized sorted key so identical drug/dosage combinations do not re-call Claude.
 - Persisted severity on both cache and prescription rows so list/detail screens can render badges without reparsing AI output.
+- Added `interaction_status` so API failures can save as `Error` while preserving a `None` severity fallback.
 
 ### 2026-06-10 - API Shape
 
@@ -53,6 +54,15 @@ This file documents the collaborative development trail for `narayan-pharmacy-ta
 - Replaced scaffold placeholder with the two required workflows only.
 - Added visible loading state, API error cards, formatted interaction cards, severity badges, collapsible detail behavior, and delete confirmation.
 - Changed Screen 1 count badge from completed drugs to visible rows to avoid confusion when the blank initial row is present.
+- Split the frontend into two actual pages after clarification: `/` for entry and `/prescriptions` for history/detail.
+- Replaced inline collapsible detail with a modal detail view for prescription history.
+
+### 2026-06-10 - Claude Output Tightening
+
+- Updated the prompt to use a senior clinical pharmacist system instruction.
+- Set Claude temperature to `0.0` for deterministic behavior.
+- Required structured JSON from Claude, then parsed and formatted it before display so raw JSON is never shown in the UI.
+- Updated the cache key format to `drug(dosage)+drug(dosage)` so dosage changes correctly trigger cache misses.
 
 ### 2026-06-10 - Backend Testing Path
 

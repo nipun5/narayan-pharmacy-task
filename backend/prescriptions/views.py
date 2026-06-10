@@ -38,6 +38,7 @@ class PrescriptionCollectionView(APIView):
             date=data["date"],
             interaction_data=interaction["interaction_data"],
             severity=interaction["severity"],
+            interaction_status=interaction["interaction_status"],
             api_error=interaction["api_error"],
             used_cache=interaction["used_cache"],
         )

@@ -8,6 +8,12 @@ class InteractionSeverity(models.TextChoices):
     SEVERE = "Severe", "Severe"
 
 
+class InteractionStatus(models.TextChoices):
+    SKIPPED = "Skipped", "Skipped"
+    COMPLETED = "Completed", "Completed"
+    ERROR = "Error", "Error"
+
+
 class Prescription(models.Model):
     patient_name = models.CharField(max_length=255)
     doctor_name = models.CharField(max_length=255)
@@ -17,6 +23,11 @@ class Prescription(models.Model):
         max_length=20,
         choices=InteractionSeverity.choices,
         default=InteractionSeverity.NONE,
+    )
+    interaction_status = models.CharField(
+        max_length=20,
+        choices=InteractionStatus.choices,
+        default=InteractionStatus.SKIPPED,
     )
     api_error = models.TextField(blank=True)
     used_cache = models.BooleanField(default=False)
