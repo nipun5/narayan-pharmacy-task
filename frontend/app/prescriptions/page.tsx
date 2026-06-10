@@ -61,14 +61,22 @@ function SeverityBadge({ severity }: { severity: Severity }) {
   );
 }
 
-function statusClass(status: InteractionStatus) {
-  if (status === "Error") {
-    return "border-amber-300 bg-amber-50 text-amber-900";
-  }
-  if (status === "Completed") {
-    return "border-emerald-300 bg-emerald-50 text-emerald-800";
-  }
-  return "border-slate-300 bg-slate-50 text-slate-700";
+function PageSwitch({ onRefresh, isRefreshing }: { onRefresh: () => void; isRefreshing: boolean }) {
+  return (
+    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+      <nav className="flex flex-col gap-2 sm:flex-row sm:items-center" aria-label="Prescription workflow">
+        <Link href="/" className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-center text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50">
+          New Prescription
+        </Link>
+        <span className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-2 text-center text-sm font-bold text-teal-800">
+          Prescription History
+        </span>
+      </nav>
+      <button type="button" className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60" disabled={isRefreshing} onClick={onRefresh}>
+        {isRefreshing ? "Refreshing..." : "Refresh"}
+      </button>
+    </div>
+  );
 }
 
 function interactionText(prescription: PrescriptionDetail) {
@@ -324,10 +332,7 @@ export default function PrescriptionsPage() {
             <h1 className="text-2xl font-bold sm:text-3xl">Prescriptions List</h1>
             <p className="text-sm text-slate-600">Review saved prescriptions and AI interaction warnings.</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/" className="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50">New Prescription</Link>
-            <button type="button" className="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60" disabled={isLoadingList} onClick={loadPrescriptions}>{isLoadingList ? "Refreshing..." : "Refresh"}</button>
-          </div>
+          <PageSwitch onRefresh={loadPrescriptions} isRefreshing={isLoadingList} />
         </header>
 
         {error && <div className="mb-5 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm font-bold text-red-800">{error}</div>}
@@ -389,23 +394,27 @@ export default function PrescriptionsPage() {
         )}
 
         {selected && !isLoadingDetail && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/50 px-4 py-6 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="prescription-detail-title" onClick={(event) => { if (event.target === event.currentTarget) setSelected(null); }}>
-            <section className="w-full max-w-3xl rounded-lg border border-slate-200 bg-white p-4 shadow-xl sm:p-6">
-              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-xs font-bold uppercase text-blue-700">Prescription Detail</p>
-                  <h2 id="prescription-detail-title" className="text-xl font-bold">{selected.patient_name}</h2>
-                  <p className="text-sm text-slate-600">{selected.date} | {selected.doctor_name} | {selected.drug_count} drug{selected.drug_count === 1 ? "" : "s"}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <SeverityBadge severity={selected.severity} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-3 py-4" role="dialog" aria-modal="true" aria-labelledby="prescription-detail-title" onClick={(event) => { if (event.target === event.currentTarget) setSelected(null); }}>
+            <section className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+              <div className="flex-shrink-0 border-b border-slate-200 px-4 py-4 sm:px-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs font-bold uppercase text-blue-700">Prescription Detail</p>
+                    <h2 id="prescription-detail-title" className="text-xl font-bold">{selected.patient_name}</h2>
+                    <p className="text-sm text-slate-600">{selected.date} | {selected.doctor_name} | {selected.drug_count} drug{selected.drug_count === 1 ? "" : "s"}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <SeverityBadge severity={selected.severity} />
                     <button ref={closeButtonRef} type="button" className="rounded border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50" onClick={() => setSelected(null)}>Close</button>
+                  </div>
                 </div>
               </div>
 
-              <InteractionAnalysisCard prescription={selected} />
+              <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+                <InteractionAnalysisCard prescription={selected} />
+              </div>
 
-              <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+              <div className="flex flex-shrink-0 flex-col-reverse gap-2 border-t border-slate-200 px-4 py-3 sm:flex-row sm:justify-between sm:px-6">
                 <button type="button" className="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-100 disabled:cursor-wait disabled:opacity-60" disabled={deletingId === selected.id} onClick={() => deletePrescription(selected.id)}>
                   {deletingId === selected.id ? "Deleting..." : "Delete Prescription"}
                 </button>
