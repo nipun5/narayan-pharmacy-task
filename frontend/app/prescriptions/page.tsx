@@ -377,14 +377,31 @@ export default function PrescriptionsPage() {
                 </div>
               </div>
 
-              <div className="mb-4 grid gap-2 sm:grid-cols-2">
-                {selected.drugs.length === 0 && <div className="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">No drugs entered.</div>}
-                {selected.drugs.map((drug) => (
-                  <div key={drug.id} className="rounded border border-slate-200 bg-slate-50 px-3 py-2">
-                    <p className="font-semibold">{drug.name}</p>
-                    <p className="text-sm text-slate-600">{drug.dosage}</p>
-                  </div>
-                ))}
+              <div className="mb-4">
+                <h3 className="mb-2 text-sm font-bold">Prescribed Medications</h3>
+                <div className="overflow-hidden rounded border border-slate-200">
+                  <table className="w-full border-collapse text-left text-sm">
+                    <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                      <tr>
+                        <th scope="col" className="px-3 py-2">Medication Name</th>
+                        <th scope="col" className="px-3 py-2">Dosage / Directions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selected.drugs.length === 0 && (
+                        <tr>
+                          <td className="px-3 py-3 text-slate-500" colSpan={2}>No drugs entered.</td>
+                        </tr>
+                      )}
+                      {selected.drugs.map((drug) => (
+                        <tr key={drug.id} className="border-t border-slate-200">
+                          <td className="px-3 py-3 font-semibold">{drug.name}</td>
+                          <td className="px-3 py-3 text-slate-700">{drug.dosage}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               <InteractionAnalysisCard prescription={selected} />
