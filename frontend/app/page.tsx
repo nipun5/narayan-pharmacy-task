@@ -330,11 +330,17 @@ export default function PrescriptionEntryPage() {
                 <button type="button" className="rounded bg-slate-900 px-3 py-2 text-sm font-bold text-white transition hover:bg-slate-700" onClick={() => setDrugs((current) => [...current, emptyDrug()])}>Add Row</button>
               </div>
 
+              <div className="hidden grid-cols-[1fr_1fr_auto] gap-3 px-3 text-xs font-bold uppercase tracking-wide text-slate-500 sm:grid">
+                <span>Drug Name</span>
+                <span>Dosage / Directions</span>
+                <span className="w-[88px] text-center">Action</span>
+              </div>
+
               {drugs.map((drug, index) => (
                 <div key={index} className="grid gap-3 rounded border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[1fr_1fr_auto]">
                   <input className="rounded border border-slate-300 bg-white px-3 py-2 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100" value={drug.name} onChange={(event) => updateDrug(index, "name", event.target.value)} placeholder="Drug Name, e.g. Warfarin" />
-                  <input className="rounded border border-slate-300 bg-white px-3 py-2 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100" value={drug.dosage} onChange={(event) => updateDrug(index, "dosage", event.target.value)} placeholder="Dosage, e.g. 5mg" />
-                  <button type="button" className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40" disabled={drugs.length === 1} onClick={() => removeDrug(index)}>Remove</button>
+                  <input className="rounded border border-slate-300 bg-white px-3 py-2 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100" value={drug.dosage} onChange={(event) => updateDrug(index, "dosage", event.target.value)} placeholder="Dosage / Directions, e.g. 5mg daily" />
+                  <button type="button" className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 sm:w-[88px]" disabled={drugs.length === 1} onClick={() => removeDrug(index)}>Remove</button>
                 </div>
               ))}
             </div>
