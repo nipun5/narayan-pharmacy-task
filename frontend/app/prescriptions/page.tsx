@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Severity = "None" | "Mild" | "Moderate" | "Severe";
 type InteractionStatus = "Skipped" | "Completed" | "Error";
@@ -210,6 +210,7 @@ export default function PrescriptionsPage() {
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   async function loadPrescriptions() {
     setIsLoadingList(true);
@@ -272,6 +273,23 @@ export default function PrescriptionsPage() {
     loadPrescriptions();
   }, []);
 
+  useEffect(() => {
+    if (selected) {
+      closeButtonRef.current?.focus();
+    }
+  }, [selected]);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && selected) {
+        setSelected(null);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selected]);
+
   return (
     <main className="min-h-screen bg-slate-100 text-slate-950">
       <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
@@ -282,7 +300,7 @@ export default function PrescriptionsPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/" className="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50">New Prescription</Link>
-            <button type="button" className="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50" onClick={loadPrescriptions}>Refresh</button>
+            <button type="button" className="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60" disabled={isLoadingList} onClick={loadPrescriptions}>{isLoadingList ? "Refreshing..." : "Refresh"}</button>
           </div>
         </header>
 
@@ -293,12 +311,12 @@ export default function PrescriptionsPage() {
             <table className="w-full min-w-[760px] border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
-                  <th className="px-3 py-3">Patient</th>
-                  <th className="px-3 py-3">Date</th>
-                  <th className="px-3 py-3">Drug Count</th>
-                  <th className="px-3 py-3">Severity</th>
-                  <th className="px-3 py-3">Status</th>
-                  <th className="px-3 py-3 text-right">Action</th>
+                  <th scope="col" className="px-3 py-3">Patient</th>
+                  <th scope="col" className="px-3 py-3">Date</th>
+                  <th scope="col" className="px-3 py-3">Drug Count</th>
+                  <th scope="col" className="px-3 py-3">Severity</th>
+                  <th scope="col" className="px-3 py-3">Status</th>
+                  <th scope="col" className="px-3 py-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -306,7 +324,14 @@ export default function PrescriptionsPage() {
                   <tr><td className="px-3 py-6 text-slate-500" colSpan={6}>Loading prescriptions...</td></tr>
                 )}
                 {!isLoadingList && prescriptions.length === 0 && (
-                  <tr><td className="px-3 py-6 text-slate-500" colSpan={6}>No saved prescriptions yet.</td></tr>
+                  <tr>
+                    <td className="px-3 py-8 text-center text-slate-500" colSpan={6}>
+                      <p className="text-sm font-medium">No saved prescriptions yet.</p>
+                      <Link href="/" className="mt-2 inline-flex text-xs font-bold text-blue-700 underline underline-offset-2 hover:text-blue-900">
+                        Enter the first prescription
+                      </Link>
+                    </td>
+                  </tr>
                 )}
                 {prescriptions.map((prescription) => (
                   <tr key={prescription.id} className="cursor-pointer border-t border-slate-200 transition hover:bg-blue-50" onClick={() => openDetail(prescription.id)}>
@@ -327,24 +352,30 @@ export default function PrescriptionsPage() {
           </div>
         </section>
 
+        {!isLoadingList && prescriptions.length > 0 && (
+          <p className="mt-3 text-right text-xs text-slate-500">
+            {prescriptions.length} prescription{prescriptions.length === 1 ? "" : "s"} total
+          </p>
+        )}
+
         {isLoadingDetail && (
-          <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/40 px-4">
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/40 px-4" aria-label="Loading prescription detail" aria-live="polite">
             <div className="rounded-lg bg-white px-5 py-4 text-sm font-bold text-slate-700 shadow-lg">Loading prescription detail...</div>
           </div>
         )}
 
         {selected && !isLoadingDetail && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/50 px-4 py-6 sm:items-center" role="dialog" aria-modal="true">
+          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/50 px-4 py-6 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="prescription-detail-title" onClick={(event) => { if (event.target === event.currentTarget) setSelected(null); }}>
             <section className="w-full max-w-3xl rounded-lg border border-slate-200 bg-white p-4 shadow-xl sm:p-6">
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase text-blue-700">Prescription Detail</p>
-                  <h2 className="text-xl font-bold">{selected.patient_name}</h2>
+                  <h2 id="prescription-detail-title" className="text-xl font-bold">{selected.patient_name}</h2>
                   <p className="text-sm text-slate-600">{selected.date} | {selected.doctor_name} | {selected.drug_count} drug{selected.drug_count === 1 ? "" : "s"}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <SeverityBadge severity={selected.severity} />
-                  <button type="button" className="rounded border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50" onClick={() => setSelected(null)}>Close</button>
+                    <button ref={closeButtonRef} type="button" className="rounded border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50" onClick={() => setSelected(null)}>Close</button>
                 </div>
               </div>
 
