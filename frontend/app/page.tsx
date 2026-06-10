@@ -295,7 +295,6 @@ export default function PrescriptionEntryPage() {
       <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-8">
         <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase text-teal-700">Screen 1</p>
             <h1 className="text-2xl font-bold sm:text-3xl">Prescription Entry Form</h1>
             <p className="text-sm text-slate-600">Save a prescription and check drug interactions.</p>
           </div>

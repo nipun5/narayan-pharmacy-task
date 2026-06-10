@@ -277,7 +277,6 @@ export default function PrescriptionsPage() {
       <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
         <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase text-blue-700">Screen 2</p>
             <h1 className="text-2xl font-bold sm:text-3xl">Prescriptions List</h1>
             <p className="text-sm text-slate-600">Review saved prescriptions and AI interaction warnings.</p>
           </div>
