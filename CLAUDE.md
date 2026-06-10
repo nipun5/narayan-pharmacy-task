@@ -26,10 +26,12 @@ narayan-pharmacy-task/
       wsgi.py
       asgi.py
     prescriptions/
-      __init__.py
-      apps.py
+      models.py
+      serializers.py
+      services.py
+      views.py
+      urls.py
       migrations/
-        __init__.py
   frontend/
     README.md
     package.json
@@ -93,7 +95,7 @@ Do not add:
 ## Backend Conventions
 
 - Follow PEP8 and idiomatic Django naming.
-- Use clear model names such as `Prescription`, `PrescriptionDrug`, and `InteractionCache`.
+- Use clear model names: `Prescription`, `PrescriptionItem`, and `DrugInteractionCache`.
 - Keep Claude interaction logic in a dedicated service module, not inside views.
 - Read `ANTHROPIC_API_KEY` only from environment variables.
 - Never hardcode secrets, demo keys, or provider credentials.
@@ -138,11 +140,16 @@ Expected local URLs:
 - Backend API: `http://127.0.0.1:8000`
 - Frontend: `http://localhost:3000`
 
-## First Implementation Milestones
+## Implemented API Surface
 
-1. Create backend models and migrations for prescriptions, drugs, and interaction cache.
-2. Add backend API endpoints for create prescription, list prescriptions, and prescription detail.
-3. Implement Claude service with single-drug skip, graceful errors, clinical prompt, and cache lookup.
-4. Build the prescription entry screen.
-5. Build the prescriptions list/detail screen.
-6. Add focused tests for edge cases, API failures, and cache behavior.
+- `GET /api/prescriptions/`: list saved prescriptions with patient, date, drug count, and severity.
+- `POST /api/prescriptions/`: validate prescription payload, run/cache interaction check, save prescription and items, return detail.
+- `GET /api/prescriptions/<id>/`: return full prescription, prescribed drugs, interaction text, cache status, API warning, and severity.
+- `DELETE /api/prescriptions/<id>/`: delete a prescription and its related drug rows through Django cascade.
+
+## Implementation Notes
+
+- `backend/prescriptions/services.py` owns Claude prompting, one-drug skip behavior, cache lookup, and graceful API failure handling.
+- The cache key is a normalized, alphabetically sorted, comma-separated drug and dosage combination.
+- The frontend consumes REST only; it does not call Claude directly.
+- The frontend shows formatted interaction text, visible loading/error states, collapsible detail rows, and delete confirmation.
