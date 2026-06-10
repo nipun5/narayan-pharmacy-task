@@ -166,7 +166,6 @@ function InteractionAnalysisCard({ prescription }: { prescription: PrescriptionD
           <p className="text-sm text-slate-600">
             Patient: <span className="font-bold">{prescription.patient_name}</span> | Doctor: <span className="font-bold">{prescription.doctor_name}</span>
           </p>
-          <p className="mt-1 text-xs font-semibold uppercase text-slate-500">Status: {prescription.interaction_status}</p>
         </div>
         <SeverityBadge severity={prescription.severity} />
       </div>
@@ -176,6 +175,33 @@ function InteractionAnalysisCard({ prescription }: { prescription: PrescriptionD
           Interaction check failed, but this prescription was saved. Please retry review before dispensing.
         </div>
       )}
+
+      <section className="mb-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <h3 className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+          Prescribed Medications
+        </h3>
+        <table className="w-full border-collapse text-left text-sm">
+          <thead className="bg-white text-xs uppercase text-slate-500">
+            <tr>
+              <th scope="col" className="px-3 py-2">Medication Name</th>
+              <th scope="col" className="px-3 py-2">Dosage / Directions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {prescription.drugs.length === 0 && (
+              <tr>
+                <td className="px-3 py-3 text-slate-500" colSpan={2}>No drugs entered.</td>
+              </tr>
+            )}
+            {prescription.drugs.map((drug) => (
+              <tr key={drug.id} className="border-t border-slate-200">
+                <td className="px-3 py-3 font-semibold text-slate-950">{drug.name}</td>
+                <td className="px-3 py-3 text-slate-700">{drug.dosage}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
 
       <p className="mb-5 text-base leading-7 text-slate-900 sm:text-lg">{summary}</p>
 
@@ -374,33 +400,6 @@ export default function PrescriptionsPage() {
                 <div className="flex flex-wrap gap-2">
                   <SeverityBadge severity={selected.severity} />
                     <button ref={closeButtonRef} type="button" className="rounded border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50" onClick={() => setSelected(null)}>Close</button>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <h3 className="mb-2 text-sm font-bold">Prescribed Medications</h3>
-                <div className="overflow-hidden rounded border border-slate-200">
-                  <table className="w-full border-collapse text-left text-sm">
-                    <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                      <tr>
-                        <th scope="col" className="px-3 py-2">Medication Name</th>
-                        <th scope="col" className="px-3 py-2">Dosage / Directions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selected.drugs.length === 0 && (
-                        <tr>
-                          <td className="px-3 py-3 text-slate-500" colSpan={2}>No drugs entered.</td>
-                        </tr>
-                      )}
-                      {selected.drugs.map((drug) => (
-                        <tr key={drug.id} className="border-t border-slate-200">
-                          <td className="px-3 py-3 font-semibold">{drug.name}</td>
-                          <td className="px-3 py-3 text-slate-700">{drug.dosage}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </div>
               </div>
 

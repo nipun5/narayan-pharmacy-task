@@ -186,7 +186,6 @@ function InteractionAnalysisCard({ prescription }: { prescription: PrescriptionD
           <p className="text-sm text-slate-600">
             Patient: <span className="font-bold">{prescription.patient_name}</span> | Doctor: <span className="font-bold">{prescription.doctor_name}</span>
           </p>
-          <p className="mt-1 text-xs font-semibold uppercase text-slate-500">Status: {prescription.interaction_status}</p>
         </div>
         <SeverityBadge severity={prescription.severity} />
       </div>
