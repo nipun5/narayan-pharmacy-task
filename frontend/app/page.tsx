@@ -152,7 +152,7 @@ export default function Home() {
       }
       setPrescriptions(await response.json());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load prescriptions.");
+      setPrescriptions([]);
     } finally {
       setIsLoadingList(false);
     }
